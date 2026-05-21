@@ -20,17 +20,17 @@
 <body>
 
     <div class="container">
-        <h2>Pusat toko ada di Jakarta</h2>
+        <h2>Pusat Server Google Sheets (Cloud)</h2>
         <div class="stok-box">SISA STOK TWS: <span id="angka-stok">Memuat dari Cloud...</span></div>
 
-        <h3>Masukkan ke Keranjang</h3>
-        <p><i>Klik 1 kali untuk memasukan 1 barang ke keranjang</i></p>
+        <h3>Tahap 1: Masukkan Keranjang (Pesan)</h3>
+        <p><i>Klik 1 kali = Tambah 1 barang. Mau beli 2? Klik 2 kali!</i></p>
         
         <button class="btn-pesan" onclick="tambahKeKeranjang('Org Shopee (Jakarta)', 'Jakarta')">🛒 Shopee Jakarta (+1 Barang)</button>
         <button class="btn-pesan" onclick="tambahKeKeranjang('Org TikTok (Aceh)', 'Aceh')">🛒 TikTok Aceh (+1 Barang)</button>
 
-        <h3>Payment </h3>
-        <button class="btn-war" onclick="simulasiPaymentBareng()">🔥 Bayar 🔥</button>
+        <h3>Tahap 2: Waktu Payment Barengan</h3>
+        <button class="btn-war" onclick="simulasiPaymentBareng()">🔥 Bayar Serentak ke Cloud! 🔥</button>
 
         <div id="log-transaksi"></div>
     </div>
@@ -38,7 +38,7 @@
     <script>
         // =================================================================
         // PASTE URL WEB APP APPS SCRIPT KAMU DI ANTARA TANDA KUTIP DI BAWAH INI:
-        const API_URL = 'https://script.google.com/macros/s/AKfycbxuOfZQwcVoKWhV6d3LjHZBEG1_4k2YT5bm5XuJVOsJ5I61nVcVKjOwi-DqeKdt3ymFWw/exec';
+        const API_URL = 'https://script.google.com/macros/s/AKfycbwUMcMsKDZ3yw-Xy0zL1abg3ABmhVyzE3hX0OJq4igBH4Kozdgsq3R1zDm40XuiQc6QnQ/exec';
         // =================================================================
 
         let keranjang = []; 
