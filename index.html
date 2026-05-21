@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Data Engineering Web-Based</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f7f6; text-align: center; padding: 20px; }
+        .container { max-width: 650px; margin: auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0px 4px 10px rgba(0,0,0,0.1); }
+        .stok-box { background-color: #27ae60; color: white; padding: 15px; font-size: 30px; font-weight: bold; border-radius: 10px; margin: 10px 0; }
+        .btn-pesan { background-color: #3498db; color: white; padding: 10px 15px; border: none; cursor: pointer; border-radius: 5px; margin: 5px; font-weight: bold;}
+        .btn-war { background-color: #f1c40f; color: black; font-weight: bold; padding: 15px; width: 100%; border: none; cursor: pointer; border-radius: 5px; font-size: 18px; margin-top: 15px; }
+        #log-transaksi { margin-top: 20px; text-align: left; background: #2c3e50; color: #ecf0f1; padding: 15px; border-radius: 5px; height: 250px; overflow-y: auto; font-family: monospace; line-height: 1.5;}
+        .log-info { color: #3498db; }
+        .log-error { color: #e74c3c; font-weight: bold;}
+        .log-sukses { color: #2ecc71; font-weight: bold;}
+        .log-warning { color: #f39c12; font-style: italic;}
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Pusat Server Google Sheets (Cloud)</h2>
+        <div class="stok-box">SISA STOK TWS: <span id="angka-stok">Memuat dari Cloud...</span></div>
+
+        <h3>Tahap 1: Masukkan Keranjang (Pesan)</h3>
+        <p><i>Klik 1 kali = Tambah 1 barang. Mau beli 2? Klik 2 kali!</i></p>
+        
+        <button class="btn-pesan" onclick="tambahKeKeranjang('Org Shopee (Jakarta)', 'Jakarta')">🛒 Shopee Jakarta (+1 Barang)</button>
+        <button class="btn-pesan" onclick="tambahKeKeranjang('Org TikTok (Aceh)', 'Aceh')">🛒 TikTok Aceh (+1 Barang)</button>
+
+        <h3>Tahap 2: Waktu Payment Barengan</h3>
+        <button class="btn-war" onclick="simulasiPaymentBareng()">🔥 Bayar Serentak ke Cloud! 🔥</button>
+
+        <div id="log-transaksi"></div>
+    </div>
+
+    <script>
+        // =================================================================
+        // PASTE URL WEB APP APPS SCRIPT KAMU DI ANTARA TANDA KUTIP DI BAWAH INI:
+        const API_URL = 'https://script.google.com/macros/s/AKfycbxuOfZQwcVoKWhV6d3LjHZBEG1_4k2YT5bm5XuJVOsJ5I61nVcVKjOwi-DqeKdt3ymFWw/exec';
+        // =================================================================
+
+        let keranjang = []; 
+
+        // Saat web dibuka, ambil stok dari Google Sheets!
+        window.onload = () => {
+            fetch(API_URL)
+            .then(r => r.json())
+            .then(d => document.getElementById('angka-stok').innerText = d.sisa_stok)
+            .catch(err => document.getElementById('angka-stok').innerText = "Error API");
+        };
+
+        function tulisLog(pesan, tipeClass) {
+            let logDiv = document.getElementById('log-transaksi');
+            logDiv.innerHTML += `<div class="${tipeClass}">> ${pesan}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        function tambahKeKeranjang(namaPembeli, asalDaerah) {
+            let pembeli = keranjang.find(orang => orang.nama === namaPembeli);
+            if (!pembeli) {
+                keranjang.push({ nama: namaPembeli, jumlah: 1, asal: asalDaerah });
+                tulisLog(`🛒 ${namaPembeli} memasukkan 1 barang ke keranjang.`, "log-info");
+            } else {
+                pembeli.jumlah += 1;
+                tulisLog(`🛒 ${namaPembeli} menambah pesanan jadi total ${pembeli.jumlah} barang.`, "log-warning");
+            }
+        }
+
+        function simulasiPaymentBareng() {
+            if (keranjang.length === 0) {
+                tulisLog("⚠️ Belum ada barang di keranjang! Klik tombol +1 dulu.", "log-error");
+                return;
+            }
+
+            tulisLog("<br>🔥 MENGIRIM SINYAL PAYMENT BERSAMAAN KE API GOOGLE SHEETS! 🔥", "log-warning");
+            
+            keranjang.forEach(orang => {
+                let delay = (orang.asal === 'Jakarta') ? 10 : 150; 
+
+                setTimeout(() => {
+                    eksekusiPaymentCloud(orang.nama, orang.jumlah);
+                }, delay);
+            });
+
+            keranjang = [];
+        }
+
+        // Fungsi menembak API Google Apps Script
+        function eksekusiPaymentCloud(namaPembeli, jumlahBeli) {
+            tulisLog(`Sinyal ${namaPembeli} (Minta ${jumlahBeli} barang) tiba di server Cloud...`, "log-info");
+            
+            fetch(API_URL, {
+                method: 'POST',
+                body: JSON.stringify({ pembeli: namaPembeli, jumlah: jumlahBeli })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.sisa_stok !== undefined) document.getElementById('angka-stok').innerText = data.sisa_stok;
+                
+                if (data.status === "error") {
+                    tulisLog(`❌ ${data.pesan}`, "log-error");
+                } else {
+                    tulisLog(`✅ ${data.pesan}`, "log-sukses");
+                }
+            })
+            .catch(error => tulisLog(`❌ ERROR: Gagal terhubung ke Cloud API.`, "log-error"));
+        }
+    </script>
+</body>
+</html>
